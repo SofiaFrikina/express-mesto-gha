@@ -29,9 +29,7 @@ mongoose.connect('mongodb://127.0.0.1/mestodb', {
 // подключаем мидлвары, роуты и всё остальное...
 
 app.use(router)
-app.use('/', (req, res) => {
-  res.status(ERROR_NOT_FOUND).send({ message: 'Переданы некорректные данные' })
-})
+
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
