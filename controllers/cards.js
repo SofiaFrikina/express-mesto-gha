@@ -1,5 +1,5 @@
 const Card = require('../models/card')
-const { ERROR_VALIDATION, ERROR_NOTFOUND, ERROR_INTERNALSERVER } = require('../errors/errors')
+const { ERROR_VALIDATION, ERROR_NOT_FOUND, ERROR_SERVER } = require('../errors/errors')
 
 module.exports.getCards = (req, res) => {
   Card.find({})
@@ -8,7 +8,7 @@ module.exports.getCards = (req, res) => {
       if (err.name === 'ValidationError') {
         res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
       } else {
-        res.status(ERROR_INTERNALSERVER).send({ message: 'Произошла ошибка на сервере' })
+        res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' })
       }
     })
 };
@@ -22,21 +22,22 @@ module.exports.createCard = (req, res) => {
       if (err.name === 'ValidationError') {
         res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
       } else {
-        res.status(ERROR_INTERNALSERVER).send({ message: 'Произошла ошибка на сервере' })
+        res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' })
       }
     })
 };
 
 module.exports.deleteCardId = (req, res) => {
   Card.findByIdAndDelete(req.params.cardId)
+    .orFail(() => new Error('NotFoundError'))
     .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
       } else if (err.name === 'NotFoundError') {
-        res.status(ERROR_NOTFOUND).send({ message: 'Пользователь не найден' })
+        res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь не найден' })
       } else {
-        res.status(ERROR_INTERNALSERVER).send({ message: 'Произошла ошибка на сервере' })
+        res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' })
       }
     })
 };
@@ -46,16 +47,18 @@ module.exports.likeCard = (req, res) => {
     req.params.cardId,
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
-  ).then((card) => {
-    res.send(card)
-  })
+  )
+    .orFail(() => new Error('NotFoundError'))
+    .then((card) => {
+      res.send(card)
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
       } else if (err.name === 'NotFoundError') {
-        res.status(ERROR_NOTFOUND).send({ message: 'Пользователь не найден' })
+        res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь не найден' })
       } else {
-        res.status(ERROR_INTERNALSERVER).send({ message: 'Произошла ошибка на сервере' })
+        res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' })
       }
     })
 }
@@ -65,16 +68,18 @@ module.exports.dislikeCard = (req, res) => {
     req.params.cardId,
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
-  ).then((card) => {
-    res.send(card)
-  })
+  )
+    .orFail(() => new Error('NotFoundError'))
+    .then((card) => {
+      res.send(card)
+    })
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
       } else if (err.name === 'NotFoundError') {
-        res.status(ERROR_NOTFOUND).send({ message: 'Пользователь не найден' })
+        res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь не найден' })
       } else {
-        res.status(ERROR_INTERNALSERVER).send({ message: 'Произошла ошибка на сервере' })
+        res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' })
       }
     })
 }

@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const router = require('./routes/index')
 
 const bodyParser = require('body-parser');
-const ERROR_NOTFOUND = require('./errors/errors')
+const ERROR_NOT_FOUND = require('./errors/errors')
 const { PORT = 3000 } = process.env
 
 const app = express();
@@ -30,7 +30,7 @@ mongoose.connect('mongodb://127.0.0.1/mestodb', {
 
 app.use(router)
 app.use('/', (req, res) => {
-  res.status(ERROR_NOTFOUND).send({ message: 'Переданы некорректные данные' })
+  res.status(ERROR_NOT_FOUND).send({ message: 'Переданы некорректные данные' })
 })
 
 app.listen(PORT, () => {
