@@ -34,7 +34,7 @@ module.exports.deleteCardId = (req, res) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
-      } else if (err.name === 'NotFoundError') {
+      } else if (err.message === 'NotFoundError') {
         res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь не найден' })
       } else {
         res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' })
@@ -55,7 +55,7 @@ module.exports.likeCard = (req, res) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
-      } else if (err.name === 'NotFoundError') {
+      } else if (err.message === 'NotFoundError') {
         res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь не найден' })
       } else {
         res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' })
@@ -76,7 +76,7 @@ module.exports.dislikeCard = (req, res) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
-      } else if (err.name === 'NotFoundError') {
+      } else if (err.message === 'NotFoundError') {
         res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь не найден' })
       } else {
         res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' })

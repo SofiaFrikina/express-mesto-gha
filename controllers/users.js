@@ -25,7 +25,7 @@ const getUserId = (req, res) => {
     .catch((err) => {
       if (err.name === 'CastError') {
         res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
-      } else if (err.name === 'NotFoundError') {
+      } else if (err.message === 'NotFoundError') {
         res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь не найден' })
       } else {
         res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' })
@@ -58,7 +58,7 @@ const updateProfile = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
-      } else if (err.name === 'NotFoundError') {
+      } else if (err.message === 'NotFoundError') {
         res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь не найден' })
       } else {
         res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' })
@@ -76,7 +76,7 @@ const updateAvatar = (req, res) => {
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
-      } else if (err.name === 'NotFoundError') {
+      } else if (err.message === 'NotFoundError') {
         res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь не найден' })
       } else {
         res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' })
