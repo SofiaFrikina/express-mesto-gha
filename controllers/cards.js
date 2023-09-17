@@ -15,7 +15,7 @@ module.exports.getCards = (req, res) => {
 
 module.exports.createCard = (req, res) => {
   const { name, link } = req.body;
-  const { owner } = req.user._id;
+  const owner = req.user._id;
   Card.create({ name, link, owner })
     .then((card) => res.send(card))
     .catch((err) => {
@@ -31,8 +31,12 @@ module.exports.deleteCardId = (req, res) => {
   Card.findByIdAndDelete(req.params.cardId)
     .then((card) => res.send(card))
     .catch((err) => {
-      if (err.name === 'NotFoundError') {
-        res.status(ERROR_NOTFOUND).send({ message: 'Карточка не найдена' })
+      if (err.name === 'ValidationError') {
+        res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
+      } else if (err.name === 'NotFoundError') {
+        res.status(ERROR_NOTFOUND).send({ message: 'Пользователь не найден' })
+      } else {
+        res.status(ERROR_INTERNALSERVER).send({ message: 'Произошла ошибка на сервере' })
       }
     })
 };
