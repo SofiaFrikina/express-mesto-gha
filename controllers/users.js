@@ -19,10 +19,10 @@ const getAllUsers = (req, res) => {
 const getUserId = (req, res) => {
   User.findById(req.params.userId)
     .then((user) => {
-      return res.send(user)
+      res.send(user)
     })
     .catch((err) => {
-      if (err.name === 'ValidationError') {
+      if (err.name === 'CastError') {
         res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
       } else if (err.name === 'NotFoundError') {
         res.status(ERROR_NOTFOUND).send({ message: 'Пользователь не найден' })
@@ -49,7 +49,7 @@ const createUser = (req, res) => {
 
 const updateProfile = (req, res) => {
   const { name, about } = req.body;
-  User.findByIdAndUpdate(req.user_id, { name, about }, { new: true, runValidators: true })
+  User.findByIdAndUpdate(req.user._id, { name, about }, { new: true, runValidators: true })
     .then((user) => {
       res.send(user)
     })
@@ -66,7 +66,7 @@ const updateProfile = (req, res) => {
 
 const updateAvatar = (req, res) => {
   const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user_id, { avatar }, { new: true, runValidators: true })
+  User.findByIdAndUpdate(req.user._id, { avatar }, { new: true, runValidators: true })
     .then((user) => {
       res.send(user)
     })
