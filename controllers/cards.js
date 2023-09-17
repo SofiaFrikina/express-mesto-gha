@@ -1,12 +1,9 @@
-
-const User = require('../models/user')
+const Card = require('../models/card')
 const { ERROR_VALIDATION, ERROR_NOTFOUND, ERROR_INTERNALSERVER } = require('../errors/errors')
 
-const getAllUsers = (req, res) => {
-  User.find({})
-    .then((users) => {
-      res.send(users)
-    })
+module.exports.getCards = (req, res) => {
+  Card.find({})
+    .then((cards) => res.send(cards))
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
@@ -14,43 +11,40 @@ const getAllUsers = (req, res) => {
         res.status(ERROR_INTERNALSERVER).send({ message: 'Произошла ошибка на сервере' })
       }
     })
-}
+};
 
-const getUserId = (req, res) => {
-  User.findById(req.params.userId)
-    .then((user) => {
-      return res.send(user)
+module.exports.createCard = (req, res) => {
+  const { name, link } = req.body;
+  const { owner } = req.user._id;
+  Card.create({ name, link, owner })
+    .then((card) => res.send(card))
+    .catch((err) => {
+      if (err.name === 'ValidationError') {
+        res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
+      } else {
+        res.status(ERROR_INTERNALSERVER).send({ message: 'Произошла ошибка на сервере' })
+      }
     })
+};
+
+module.exports.deleteCardId = (req, res) => {
+  Card.findByIdAndDelete(req.params.cardId)
+    .then((card) => res.send(card))
     .catch((err) => {
       if (err.name === 'NotFoundError') {
-        res.status(ERROR_NOTFOUND).send({ message: 'Пользователь не найден' })
-      } else {
-        res.status(ERROR_INTERNALSERVER).send({ message: 'Произошла ошибка на сервере' })
+        res.status(ERROR_NOTFOUND).send({ message: 'Карточка не найдена' })
       }
     })
-}
+};
 
-const createUser = (req, res) => {
-  const { name, about, avatar } = req.body;
-  User.create({ name, about, avatar })
-    .then((user) => {
-      res.send(user)
-    })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
-      } else {
-        res.status(ERROR_INTERNALSERVER).send({ message: 'Произошла ошибка на сервере' })
-      }
-    })
-}
-
-const updateProfile = (req, res) => {
-  const { name, about } = req.body;
-  User.findByIdAndUpdate(req.user_id, { name, about }, { new: true })
-    .then((user) => {
-      res.send(user)
-    })
+module.exports.likeCard = (req, res, next) => {
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
+    { new: true },
+  ).then((card) => {
+    res.send(card)
+  })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
@@ -62,12 +56,14 @@ const updateProfile = (req, res) => {
     })
 }
 
-const updateAvatar = (req, res) => {
-  const { avatar } = req.body;
-  User.findByIdAndUpdate(req.user_id, { avatar }, { new: true })
-    .then((user) => {
-      res.send(user)
-    })
+module.exports.dislikeCard = (req, res) => {
+  Card.findByIdAndUpdate(
+    req.params.cardId,
+    { $pull: { likes: req.user._id } }, // убрать _id из массива
+    { new: true },
+  ).then((card) => {
+    res.send(card)
+  })
     .catch((err) => {
       if (err.name === 'ValidationError') {
         res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
@@ -77,11 +73,4 @@ const updateAvatar = (req, res) => {
         res.status(ERROR_INTERNALSERVER).send({ message: 'Произошла ошибка на сервере' })
       }
     })
-}
-
-
-
-
-module.exports = {
-  getAllUsers, getUserId, createUser, updateProfile, updateAvatar
 }
