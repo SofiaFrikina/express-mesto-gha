@@ -4,14 +4,13 @@ const express = require('express');
 const mongoose = require('mongoose');
 const router = require('./routes/index')
 
-const bodyParser = require('body-parser');
-const ERROR_NOT_FOUND = require('./errors/errors')
-const { PORT = 3000 } = process.env
+
+const { PORT = 3000, DB_URL = 'mongodb://127.0.0.1/mestodb' } = process.env;
 
 const app = express();
 app.use(express.json());
 
-app.use(bodyParser.json());
+
 app.use((req, res, next) => {
   req.user = {
     _id: '6506e498619df9ac589ddd67'
@@ -21,9 +20,7 @@ app.use((req, res, next) => {
 })
 
 // подключаемся к серверу mongo
-mongoose.connect('mongodb://127.0.0.1/mestodb', {
-  useNewUrlParser: true,
-});
+mongoose.connect(DB_URL)
 
 
 // подключаем мидлвары, роуты и всё остальное...
