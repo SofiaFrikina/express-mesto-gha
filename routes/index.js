@@ -1,12 +1,37 @@
 const router = require('express').Router();
 const userRouter = require('./users')
 const cardRouter = require('./cards')
-const ERROR_NOT_FOUND = require('../errors/errors')
+const NotFoundError = require('../utils/errors/NotFoundError')
+const { celebrate, Joi, errors } = require('celebrate');
+const { URL_VALIDATE } = require('../utils/constants')
+const auth = require('../middlewares/auth');
 
-router.use('/users', userRouter)
-router.use('/cards', cardRouter)
-router.use('/', (req, res) => {
-  res.status(ERROR_NOT_FOUND).send({ message: 'Переданы некорректные данные' })
+
+const { createUser, login } = require('../controllers/users');
+
+
+router.post('/signup', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().email().required(),
+    password: Joi.string().required(),
+    name: Joi.string().min(2).max(30),
+    about: Joi.string().min(2).max(30),
+    avatar: Joi.string().regex(URL_VALIDATE),
+  })
+}), createUser);
+router.post('/signin', celebrate({
+  body: Joi.object().keys({
+    email: Joi.string().email().required(),
+    password: Joi.string().required(),
+  })
+}), login);
+// роуты, которым авторизация нужна
+router.use('/users', auth, userRouter)
+router.use('/cards', auth, cardRouter)
+router.use('*', auth, (req, res, next) => {
+  next(new NotFoundError('Переданы некорректные данные'))
 })
+
+router.use(errors())
 
 module.exports = router;

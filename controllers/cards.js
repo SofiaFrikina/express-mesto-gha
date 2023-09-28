@@ -1,15 +1,15 @@
 const Card = require('../models/card')
-const { ERROR_VALIDATION, ERROR_NOT_FOUND, ERROR_SERVER, SUCCESSFUL_ANSWER } = require('../errors/errors')
+const { ValidationError, AthorizedError, ForbiddenError, NotFoundError, ConflictError, ServerError } = require('../utils/errors/errors')
+const SUCCESSFUL_ANSWER = require('../utils/constants')
 
 module.exports.getCards = (req, res) => {
   Card.find({})
     .then((cards) => res.send(cards))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
-      } else {
-        res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' })
+        return (new ValidationError('Переданы некорректные данные'))
       }
+      return (new ServerError('Произошла ошибка на сервере'))
     })
 };
 
@@ -20,25 +20,32 @@ module.exports.createCard = (req, res) => {
     .then((card) => res.status(SUCCESSFUL_ANSWER).send(card))
     .catch((err) => {
       if (err.name === 'ValidationError') {
-        res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
-      } else {
-        res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' })
+        return (new ValidationError('Переданы некорректные данные'))
       }
+      return (new ServerError('Произошла ошибка на сервере'))
     })
 };
 
 module.exports.deleteCardId = (req, res) => {
-  Card.findByIdAndDelete(req.params.cardId)
-    .orFail(() => new Error('NotFoundError'))
-    .then((card) => res.send(card))
+  Card.findById(req.params.cardId)
+    .then((card) => {
+      if (!card) {
+        throw new NotFoundError('Пользователь не найден')
+      } else if (card.owner !== req.user._id) {
+        throw (new ForbiddenError('Вы не можете удалить чужую карточку'))
+      } Card.findById(req.params.cardId)
+        .then((deletedCard) => {
+          res.send(deletedCard)
+        })
+    })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
-      } else if (err.message === 'NotFoundError') {
-        res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь не найден' })
-      } else {
-        res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' })
+      if (err.message === 'NotFoundError') {
+        return next(err);
       }
+      if (err.name === 'CastError') {
+        next(new ValidationError('Переданы некорректные данные'))
+      }
+      return (new ServerError('Произошла ошибка на сервере'))
     })
 };
 
@@ -48,18 +55,20 @@ module.exports.likeCard = (req, res) => {
     { $addToSet: { likes: req.user._id } }, // добавить _id в массив, если его там нет
     { new: true },
   )
-    .orFail(() => new Error('NotFoundError'))
     .then((card) => {
-      res.send(card)
+      if (!card) {
+        throw new NotFoundError('Пользователь не найден')
+      }
+      return res.send(card)
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
-      } else if (err.message === 'NotFoundError') {
-        res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь не найден' })
-      } else {
-        res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' })
+      if (err.message === 'NotFoundError') {
+        return next(err);
       }
+      if (err.name === 'CastError') {
+        next(new ValidationError('Переданы некорректные данные'))
+      }
+      return (new ServerError('Произошла ошибка на сервере'))
     })
 }
 
@@ -69,17 +78,19 @@ module.exports.dislikeCard = (req, res) => {
     { $pull: { likes: req.user._id } }, // убрать _id из массива
     { new: true },
   )
-    .orFail(() => new Error('NotFoundError'))
     .then((card) => {
-      res.send(card)
+      if (!card) {
+        throw new NotFoundError('Пользователь не найден')
+      }
+      return res.send(card)
     })
     .catch((err) => {
-      if (err.name === 'CastError') {
-        res.status(ERROR_VALIDATION).send({ message: 'Переданы некорректные данные' })
-      } else if (err.message === 'NotFoundError') {
-        res.status(ERROR_NOT_FOUND).send({ message: 'Пользователь не найден' })
-      } else {
-        res.status(ERROR_SERVER).send({ message: 'Произошла ошибка на сервере' })
+      if (err.message === 'NotFoundError') {
+        return next(err);
       }
+      if (err.name === 'CastError') {
+        next(new ValidationError('Переданы некорректные данные'))
+      }
+      return (new ServerError('Произошла ошибка на сервере'))
     })
 }
