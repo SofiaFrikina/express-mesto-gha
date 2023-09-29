@@ -28,9 +28,9 @@ const getUserId = (req, res) => {
         return next(err);
       }
       if (err.name === 'CastError') {
-        next(new ValidationError('Переданы некорректные данные'))
+        return next(new ValidationError('Переданы некорректные данные'))
       }
-      return (new ServerError('Произошла ошибка на сервере'))
+      return next(new ServerError('Произошла ошибка на сервере'))
     })
 }
 
@@ -45,12 +45,12 @@ const createUser = (req, res) => {
     })
     .catch((err) => {
       if (err.code === 11000) {
-        return (new ConflictError('Указанный email уже существует'))
+        return next(new ConflictError('Указанный email уже существует'))
       }
       if (err.name === 'ValidationError') {
-        return (new ValidationError('Переданы некорректные данные'))
+        return next(new ValidationError('Переданы некорректные данные'))
       }
-      return (new ServerError('Произошла ошибка на сервере'))
+      return next(new ServerError('Произошла ошибка на сервере'))
     })
 }
 
@@ -68,9 +68,9 @@ const updateProfile = (req, res) => {
         return next(err);
       }
       if (err.name === 'CastError') {
-        next(new ValidationError('Переданы некорректные данные'))
+        return next(new ValidationError('Переданы некорректные данные'))
       }
-      return (new ServerError('Произошла ошибка на сервере'))
+      return next(new ServerError('Произошла ошибка на сервере'))
     })
 }
 
@@ -88,9 +88,9 @@ const updateAvatar = (req, res) => {
         return next(err);
       }
       if (err.name === 'CastError') {
-        next(new ValidationError('Переданы некорректные данные'))
+        return next(new ValidationError('Переданы некорректные данные'))
       }
-      return (new ServerError('Произошла ошибка на сервере'))
+      return next(new ServerError('Произошла ошибка на сервере'))
     })
 }
 

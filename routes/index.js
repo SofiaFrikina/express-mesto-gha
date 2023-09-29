@@ -32,6 +32,6 @@ router.use('*', auth, (req, res, next) => {
   next(new NotFoundError('Переданы некорректные данные'))
 })
 
-router.use(errors())
+//router.use(errors())
 
 module.exports = router;

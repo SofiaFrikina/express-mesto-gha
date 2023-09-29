@@ -5,7 +5,7 @@ const bodyParser = require('body-parser');
 const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
 const router = require('./routes/index')
-
+const { errors } = require('celebrate')
 
 const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
@@ -34,7 +34,21 @@ mongoose.connect(DB_URL)
 // подключаем мидлвары, роуты и всё остальное...
 
 app.use(router)
+app.use(errors())
+app.use((err, req, res, next) => {
+  // если у ошибки нет статуса, выставляем 500
+  const { statusCode = 500, message } = err;
 
+  res
+    .status(err.statusCode)
+    .send({
+      // проверяем статус и выставляем сообщение в зависимости от него
+      message: statusCode === 500
+        ? 'На сервере произошла ошибка'
+        : message,
+    });
+  return next();
+});
 
 app.listen(PORT, () => {
   console.log(`App listening on port ${PORT}`);
