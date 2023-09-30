@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
-const bcrypt = require('bcrypt')
-const AthorizedError = require('../utils/errors/AthorizedError')
+const bcrypt = require('bcrypt');
+const { AthorizedError } = require('../utils/errors/AthorizedError');
+
 const userSchema = new mongoose.Schema({
   name: {
     type: String,
@@ -21,16 +22,16 @@ const userSchema = new mongoose.Schema({
   email: {
     type: String,
     required: true,
-    unique: true
+    unique: true,
   },
   password: {
     type: String,
     required: true,
-    select: false
-  }
-})
+    select: false,
+  },
+});
 
-userSchema.statics.findUserByCredentials = function (email, password) {
+userSchema.statics.findUserByCredentials = function findUser(email, password) {
   return this.findOne({ email }).select('+password') // this — это модель User
     .then((user) => {
       // не нашёлся — отклоняем промис

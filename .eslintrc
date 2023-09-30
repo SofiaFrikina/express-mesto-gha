@@ -1,9 +1,5 @@
 {
   "extends": "airbnb-base",
-  "eol-last": [
-    "error",
-    "never"
-  ],
   "rules": {
     "no-underscore-dangle": [
       "error",
