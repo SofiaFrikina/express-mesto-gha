@@ -44,8 +44,10 @@ const createUser = (req, res, next) => {
     .then((hash) => User.create({
       name, about, avatar, email, password: hash,
     }))
-    .then((user) => {
-      res.status(SUCCESSFUL_ANSWER).send(user);
+    .then(() => {
+      res.status(SUCCESSFUL_ANSWER).send({
+        name, about, avatar, email,
+      });
     })
     .catch((err) => {
       if (err.code === 11000) {
@@ -117,6 +119,25 @@ const login = (req, res, next) => {
     .catch(next);
 };
 
+const getCurrentUser = (req, res, next) => {
+  User.findById(req.user._id)
+    .then((user) => {
+      if (!user) {
+        throw new NotFoundError('Пользователь не найден');
+      }
+      return res.send(user);
+    })
+    .catch((err) => {
+      if (err.message === 'NotFoundError') {
+        return next(new NotFoundError('Пользователь не найден'));
+      }
+      if (err.name === 'CastError') {
+        return next(new ValidationError('Переданы некорректные данные'));
+      }
+      return next(new ServerError('Произошла ошибка на сервере'));
+    });
+};
+
 module.exports = {
-  getAllUsers, getUserId, createUser, updateProfile, updateAvatar, login,
+  getAllUsers, getUserId, createUser, updateProfile, updateAvatar, login, getCurrentUser,
 };

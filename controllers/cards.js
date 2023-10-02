@@ -3,7 +3,7 @@ const Card = require('../models/card');
 const {
   ValidationError, ForbiddenError, NotFoundError, ServerError,
 } = require('../utils/errors/errors');
-const SUCCESSFUL_ANSWER = require('../utils/constants');
+const { SUCCESSFUL_ANSWER } = require('../utils/constants');
 
 module.exports.getCards = (req, res, next) => {
   Card.find({})
@@ -29,7 +29,7 @@ module.exports.deleteCardId = (req, res, next) => {
     .then((card) => {
       if (!card) {
         throw new NotFoundError('Пользователь не найден');
-      } else if (card.owner !== req.user._id) {
+      } else if (card.owner.toString() !== req.user._id) {
         throw (new ForbiddenError('Вы не можете удалить чужую карточку'));
       } Card.findByIdAndDelete(req.params.cardId)
         .then((deletedCard) => {
@@ -43,7 +43,7 @@ module.exports.deleteCardId = (req, res, next) => {
       if (err.name === 'CastError') {
         return next(new ValidationError('Переданы некорректные данные'));
       }
-      return next(new ServerError('Произошла ошибка на сервере'));
+      return next(err);
     });
 };
 
